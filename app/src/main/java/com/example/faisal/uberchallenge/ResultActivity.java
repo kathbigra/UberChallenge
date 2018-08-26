@@ -6,9 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 
@@ -44,6 +46,8 @@ public class ResultActivity extends AppCompatActivity {
     private ArrayList<GridItem> mGridData;
     int pageNumber = 1;
     private String searchString = "kittens";
+    private boolean isLoading = false;
+    private boolean userScrolled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +60,35 @@ public class ResultActivity extends AppCompatActivity {
             searchString = extras.getString("searchString");
         }
         mGridView = (GridView) findViewById(R.id.resultView);
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (!isLoading && userScrolled && firstVisibleItem + visibleItemCount >= totalItemCount && totalItemCount > 0) {
+                    pageNumber++;
+                    new FetchResultTask().execute();
+                }
+            }
+        });
+        mGridView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (view == mGridView && motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    userScrolled = true;
+                }
+                return false;
+            }
+        });
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mGridData = new ArrayList<>();
         mGridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, mGridData);
         mGridView.setAdapter(mGridAdapter);
         new FetchResultTask().execute();
-        mProgressBar.setVisibility(View.VISIBLE);
+
     }
 
     private String getSearchUrl() {
@@ -142,7 +169,16 @@ public class ResultActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
+            mGridAdapter.notifyDataSetChanged();
             mProgressBar.setVisibility(View.GONE);
+            isLoading = false;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            isLoading = true;
+            mProgressBar.setVisibility(View.VISIBLE);
         }
 
         private void populateImages(final JSONArray photos) throws JSONException, IOException {
@@ -157,21 +193,6 @@ public class ResultActivity extends AppCompatActivity {
                 mGridData.add(item);
 
             }
-           /* GridView gridview = (GridView) findViewById(R.id.resultView);
-            gridview.setAdapter(new GridViewAdapter(getApplicationContext(), imageUrlList));
-            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        int position, long id) {
-                    try {
-                        Toast.makeText(MainActivity.this, getUrl(photos.getJSONObject(position)),
-                                Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });*/
-
-
         }
 
         private String getUrl(JSONObject photo) throws JSONException {
