@@ -2,17 +2,14 @@ package com.example.faisal.uberchallenge.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.faisal.uberchallenge.GridItem;
-import com.example.faisal.uberchallenge.ResultActivity;
+import com.example.faisal.uberchallenge.ImageLoader;
 import com.example.faisal.uberchallenge.R;
 
 import java.util.ArrayList;
@@ -30,6 +27,7 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
         this.layoutResourceId = layoutResourceId;
         this.mContext = mContext;
         this.mGridData = mGridData;
+        imageLoader = new ImageLoader(mContext);
     }
 
     public void setGridData(ArrayList<GridItem> mGridData) {
@@ -37,6 +35,7 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
         notifyDataSetChanged();
     }
 
+    public ImageLoader imageLoader;
 
     public int getCount() {
         return mGridData.size();
@@ -51,11 +50,13 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
             holder = new ViewHolder();
             holder.imageView = (ImageView) row.findViewById(R.id.grid_item_image);
             row.setTag(holder);
+            imageLoader.displayImage(mGridData.get(position).getImage(), holder.imageView);
         } else {
             holder = (ViewHolder) row.getTag();
         }
-        GridItem item = mGridData.get(position);
-        holder.imageView.setImageBitmap(item.getBitMap());
+        // GridItem item = mGridData.get(position);
+        //holder.imageView.setImageBitmap(item.getBitMap());
+
         return row;
     }
 

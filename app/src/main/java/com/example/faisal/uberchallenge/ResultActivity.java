@@ -186,10 +186,10 @@ public class ResultActivity extends AppCompatActivity {
             for (int i = 0; i < photos.length(); i++) {
                 item = new GridItem();
                 item.setImage(getUrl(photos.getJSONObject(i)));
-                Bitmap bitMap = null;
+                /*Bitmap bitMap = null;
                 InputStream in = new java.net.URL(item.getImage()).openStream();
                 bitMap = BitmapFactory.decodeStream(in);
-                item.setBitMap(bitMap);
+                item.setBitMap(bitMap);*/
                 mGridData.add(item);
 
             }
