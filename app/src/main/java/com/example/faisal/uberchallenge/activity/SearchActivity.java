@@ -1,34 +1,14 @@
-package com.example.faisal.uberchallenge;
+package com.example.faisal.uberchallenge.activity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.example.faisal.uberchallenge.adapters.GridViewAdapter;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
+import com.example.faisal.uberchallenge.R;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -40,11 +20,12 @@ public class SearchActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Button searchButton = (Button) findViewById(R.id.searchButton);
+        //Start the new activity which will fetch search results and display them. The search String is passed asthe parameter for the new activity
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent searchIntent = new Intent(SearchActivity.this, ResultActivity.class);
-                searchIntent.putExtra("searchString", ((EditText) findViewById(R.id.searchText)).getText().toString()); //Optional parameters
+                searchIntent.putExtra("searchString", ((EditText) findViewById(R.id.searchText)).getText().toString());
                 SearchActivity.this.startActivity(searchIntent);
             }
         });

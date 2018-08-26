@@ -8,19 +8,19 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
-import com.example.faisal.uberchallenge.GridItem;
-import com.example.faisal.uberchallenge.ImageLoader;
+import com.example.faisal.uberchallenge.components.GridItem;
+import com.example.faisal.uberchallenge.components.ImageLoader;
 import com.example.faisal.uberchallenge.R;
 
 import java.util.ArrayList;
 
 
 public class GridViewAdapter extends ArrayAdapter<GridItem> {
+
+    public ImageLoader imageLoader;
     private Context mContext;
-
     private int layoutResourceId;
-
-    private ArrayList<GridItem> mGridData = new ArrayList<GridItem>();
+    private ArrayList<GridItem> mGridData;
 
     public GridViewAdapter(Context mContext, int layoutResourceId, ArrayList<GridItem> mGridData) {
         super(mContext, layoutResourceId, mGridData);
@@ -35,7 +35,9 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
         notifyDataSetChanged();
     }
 
-    public ImageLoader imageLoader;
+    public ArrayList<GridItem> getmGridData() {
+        return mGridData;
+    }
 
     public int getCount() {
         return mGridData.size();
@@ -50,14 +52,16 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
             holder = new ViewHolder();
             holder.imageView = (ImageView) row.findViewById(R.id.grid_item_image);
             row.setTag(holder);
-            imageLoader.displayImage(mGridData.get(position).getImage(), holder.imageView);
         } else {
             holder = (ViewHolder) row.getTag();
         }
-        // GridItem item = mGridData.get(position);
-        //holder.imageView.setImageBitmap(item.getBitMap());
-
+        //Call to get the image either from net/memory cache/file cache and the populate it in the imageView
+        imageLoader.displayImage(mGridData.get(position).getUrl(), holder.imageView);
         return row;
+    }
+
+    public void addToGridData(GridItem item) {
+        mGridData.add(item);
     }
 
     static class ViewHolder {
