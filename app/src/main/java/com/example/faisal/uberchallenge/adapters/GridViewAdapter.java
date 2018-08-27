@@ -30,11 +30,6 @@ public class GridViewAdapter extends ArrayAdapter<GridItem> {
         imageLoader = new ImageLoader(mContext);
     }
 
-    public void setGridData(ArrayList<GridItem> mGridData) {
-        this.mGridData = mGridData;
-        notifyDataSetChanged();
-    }
-
     public ArrayList<GridItem> getmGridData() {
         return mGridData;
     }

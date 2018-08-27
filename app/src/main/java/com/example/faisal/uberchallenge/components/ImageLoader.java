@@ -32,7 +32,6 @@ public class ImageLoader {
     private Map<ImageView, String> recyclerMap =
             Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     private ExecutorService executorService;
-    private Handler handler = new Handler();
     private Resources resources;
     private Map<String, Boolean> serverRequestMap = Collections.synchronizedMap(new HashMap<String, Boolean>());
 
@@ -91,7 +90,7 @@ public class ImageLoader {
 
 
     //Task for the queue
-    private class Photo {
+    public class Photo {
         public String url;
         public ImageView imageView;
 

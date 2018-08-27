@@ -1,6 +1,7 @@
 package com.example.faisal.uberchallenge.cache;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 
