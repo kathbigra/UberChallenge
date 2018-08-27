@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debugAndroidTest</a> &gt; <a href="index.source.html" class="el_package">com.example.faisal.uberchallenge.activity</a> &gt; <span class="el_source">ResultActivity.java</span></div><h1>ResultActivity.java</h1><pre class="source lang-java linenums">package com.example.faisal.uberchallenge.activity;
+
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.example.faisal.uberchallenge.R;
+import com.example.faisal.uberchallenge.adapters.GridViewAdapter;
+import com.example.faisal.uberchallenge.components.GridItem;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+
+import static com.example.faisal.uberchallenge.utilities.NetworkUtility.getJsonString;
+import static com.example.faisal.uberchallenge.utilities.NetworkUtility.getUrlConnection;
+
+<span class="fc" id="L31">public class ResultActivity extends AppCompatActivity {</span>
+
+    //Holder url for fetching individual images.
+<span class="fc" id="L34">    public static String FLICKR_IMAGE_STATIC_URL = &quot;http://farm[0].staticflickr.com/[1]/[2]_[3].jpg&quot;;</span>
+    //Query URL to fetch results from flickr api. With holders for query string and page number.
+<span class="fc" id="L36">    public static String FLICKR_URL = &quot;https://api.flickr.com/services/rest/?method=flickr.photos.search&amp;api_key=3e7cc266ae2b0e0d78e279ce8e361736&amp;\n&quot; +</span>
+            &quot;format=json&amp;nojsoncallback=1&amp;safe_search=1&amp;text=[0]&amp;page=[1]&quot;;
+
+    private GridView mGridView;
+    private ProgressBar mProgressBar;
+    private GridViewAdapter mGridAdapter;
+<span class="fc" id="L42">    private int pageNumber = 1;</span>
+<span class="fc" id="L43">    private String searchString = &quot;&quot;;</span>
+<span class="fc" id="L44">    private boolean isLoading = false;</span>
+<span class="fc" id="L45">    private boolean userScrolled = false;</span>
+
+    @Override
+    public void onBackPressed() {
+        //Clear the cache before executing a new search.
+<span class="nc" id="L50">        super.onBackPressed();</span>
+<span class="nc" id="L51">        mGridAdapter.imageLoader.clearCache();</span>
+<span class="nc" id="L52">    }</span>
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L56">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L57">        Log.i(ResultActivity.class.getSimpleName(), &quot;Starting result activity&quot;);</span>
+<span class="fc" id="L58">        setContentView(R.layout.result_view);</span>
+<span class="fc" id="L59">        Bundle extras = getIntent().getExtras();</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (extras != null) {</span>
+<span class="fc" id="L61">            searchString = extras.getString(&quot;searchString&quot;);</span>
+        }
+<span class="fc" id="L63">        mGridView = (GridView) findViewById(R.id.resultView);</span>
+<span class="fc" id="L64">        addListenersToGridView();</span>
+<span class="fc" id="L65">        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);</span>
+<span class="fc" id="L66">        mGridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, new ArrayList&lt;GridItem&gt;());</span>
+<span class="fc" id="L67">        mGridView.setAdapter(mGridAdapter);</span>
+        //Clear cache at the start of this activity, before executing new search.
+<span class="fc" id="L69">        mGridAdapter.imageLoader.clearCache();</span>
+<span class="fc" id="L70">        Log.i(ResultActivity.class.getSimpleName(), &quot;Run search query&quot;);</span>
+<span class="fc" id="L71">        new FetchResultTask().execute();</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Adding various listeners on the grid view component
+     */
+    private void addListenersToGridView() {
+<span class="fc" id="L78">        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {</span>
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                //Do Nothing
+<span class="nc" id="L82">            }</span>
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+<span class="pc bpc" id="L86" title="7 of 10 branches missed.">                if (!isLoading &amp;&amp; userScrolled &amp;&amp; firstVisibleItem + visibleItemCount &gt;= totalItemCount &amp;&amp; totalItemCount &gt; 0 &amp;&amp; pageNumber != -1) {</span>
+<span class="nc" id="L87">                    Log.i(ResultActivity.class.getSimpleName(), &quot;Reached end of page. Fetching new page data.&quot;);</span>
+<span class="nc" id="L88">                    pageNumber++;</span>
+<span class="nc" id="L89">                    new FetchResultTask().execute();</span>
+                }
+<span class="fc" id="L91">            }</span>
+        });
+<span class="fc" id="L93">        mGridView.setOnTouchListener(new View.OnTouchListener() {</span>
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+<span class="nc bnc" id="L96" title="All 4 branches missed.">                if (view == mGridView &amp;&amp; motionEvent.getAction() == MotionEvent.ACTION_MOVE) {</span>
+<span class="nc" id="L97">                    userScrolled = true;</span>
+                }
+<span class="nc" id="L99">                return false;</span>
+            }
+        });
+<span class="fc" id="L102">        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {</span>
+            @Override
+            public void onItemClick(AdapterView&lt;?&gt; parent, View view, int position, long id) {
+<span class="nc" id="L105">                Log.i(ResultActivity.class.getSimpleName(), &quot;Image clicked at postion: &quot; + position);</span>
+<span class="nc" id="L106">                Toast toast = Toast.makeText(getApplicationContext(), mGridAdapter.getmGridData().get(position).getTitle(), Toast.LENGTH_SHORT);</span>
+<span class="nc" id="L107">                toast.show();</span>
+<span class="nc" id="L108">            }</span>
+        });
+<span class="fc" id="L110">    }</span>
+
+<span class="fc" id="L112">    private class FetchResultTask extends AsyncTask&lt;String, String, String&gt; {</span>
+
+        @Override
+        protected String doInBackground(String... strings) {
+<span class="fc" id="L116">            JSONObject response = new JSONObject();</span>
+            try {
+                //Get result from query string
+<span class="fc" id="L119">                response = getJSONObjectFromURL();</span>
+<span class="fc" id="L120">                Log.i(ResultActivity.class.getSimpleName(), &quot;Query successful for page number: &quot; + pageNumber);</span>
+<span class="nc" id="L121">            } catch (IOException e) {</span>
+<span class="nc" id="L122">                Log.e(ResultActivity.class.getSimpleName(), e.getMessage());</span>
+<span class="nc" id="L123">            } catch (JSONException e) {</span>
+<span class="nc" id="L124">                Log.e(ResultActivity.class.getSimpleName(), e.getMessage());</span>
+<span class="pc" id="L125">            }</span>
+<span class="fc" id="L126">            return response.toString();</span>
+        }
+
+        /**
+         * Method to execute actual search query from Flickr
+         *
+         * @return result
+         * @throws IOException
+         * @throws JSONException
+         */
+        private JSONObject getJSONObjectFromURL() throws IOException, JSONException {
+<span class="fc" id="L137">            URL url = new URL(getSearchUrl());</span>
+<span class="fc" id="L138">            HttpURLConnection urlConnection = getUrlConnection(url);</span>
+<span class="fc" id="L139">            urlConnection.connect();</span>
+<span class="fc" id="L140">            String jsonString = getJsonString(url);</span>
+<span class="fc" id="L141">            System.out.println(&quot;JSON: &quot; + jsonString);</span>
+<span class="fc" id="L142">            urlConnection.disconnect();</span>
+<span class="fc" id="L143">            return new JSONObject(jsonString);</span>
+        }
+
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+<span class="fc" id="L151">                Log.i(ResultActivity.class.getSimpleName(), &quot;Inside post execute.&quot;);</span>
+<span class="fc" id="L152">                JSONObject resultObject = null;</span>
+<span class="fc" id="L153">                resultObject = new JSONObject(result);</span>
+<span class="fc" id="L154">                JSONArray photosArray = resultObject.getJSONObject(&quot;photos&quot;).getJSONArray(&quot;photo&quot;);</span>
+                //Stop if no more results are coming or if the query results in 0 match.
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">                if (photosArray.length() == 0) {</span>
+<span class="nc" id="L157">                    pageNumber = -1;</span>
+<span class="nc" id="L158">                    return;</span>
+                }
+                //Get all the images details and process then to create Image views and notify the adapter
+<span class="fc" id="L161">                populateImages(photosArray);</span>
+<span class="fc" id="L162">                mGridAdapter.notifyDataSetChanged();</span>
+<span class="fc" id="L163">                mProgressBar.setVisibility(View.GONE);</span>
+<span class="fc" id="L164">                isLoading = false;</span>
+<span class="fc" id="L165">            } catch (JSONException e) {</span>
+<span class="fc" id="L166">                Log.e(ResultActivity.class.getSimpleName(), e.getMessage());</span>
+<span class="fc" id="L167">            }</span>
+<span class="fc" id="L168">        }</span>
+
+        @Override
+        protected void onPreExecute() {
+<span class="fc" id="L172">            Log.i(ResultActivity.class.getSimpleName(), &quot;Inside pre execute.&quot;);</span>
+<span class="fc" id="L173">            isLoading = true;</span>
+<span class="fc" id="L174">            mProgressBar.setVisibility(View.VISIBLE);</span>
+<span class="fc" id="L175">        }</span>
+
+        private void populateImages(final JSONArray photos) throws JSONException {
+            GridItem item;
+<span class="fc" id="L179">            Log.i(ResultActivity.class.getSimpleName(), &quot;Populating grid item for every new Image.&quot;);</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            for (int i = 0; i &lt; photos.length(); i++) {</span>
+<span class="fc" id="L181">                item = new GridItem();</span>
+<span class="fc" id="L182">                item.setUrl(getUrl(photos.getJSONObject(i)));</span>
+<span class="fc" id="L183">                item.setTitle(photos.getJSONObject(i).getString(&quot;title&quot;));</span>
+<span class="fc" id="L184">                mGridAdapter.addToGridData(item);</span>
+            }
+<span class="fc" id="L186">            Log.i(ResultActivity.class.getSimpleName(), &quot;Populated details for: &quot; + photos.length() + &quot; assets.&quot;);</span>
+<span class="fc" id="L187">        }</span>
+
+        /**
+         * Get the individual image url
+         *
+         * @return Final URL
+         */
+        private String getUrl(JSONObject photo) throws JSONException {
+<span class="fc" id="L195">            String holderUrl = FLICKR_IMAGE_STATIC_URL;</span>
+<span class="fc" id="L196">            String downloadUrl = holderUrl</span>
+<span class="fc" id="L197">                    .replace(&quot;[0]&quot;, photo.getString(&quot;farm&quot;))</span>
+<span class="fc" id="L198">                    .replace(&quot;[1]&quot;, photo.getString(&quot;server&quot;))</span>
+<span class="fc" id="L199">                    .replace(&quot;[2]&quot;, photo.getString(&quot;id&quot;))</span>
+<span class="fc" id="L200">                    .replace(&quot;[3]&quot;, photo.getString(&quot;secret&quot;));</span>
+<span class="fc" id="L201">            return downloadUrl;</span>
+        }
+
+        /**
+         * Get the search url by replacing the holders for query string and page number to be fetched
+         *
+         * @return Final URL
+         */
+        private String getSearchUrl() {
+<span class="fc" id="L210">            String holderURL = FLICKR_URL;</span>
+<span class="fc" id="L211">            String queryURL = holderURL</span>
+<span class="fc" id="L212">                    .replace(&quot;[0]&quot;, searchString)</span>
+<span class="fc" id="L213">                    .replace(&quot;[1]&quot;, Integer.toString(pageNumber));</span>
+<span class="fc" id="L214">            return queryURL;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span>Generated by the Android Gradle plugin 3.1.4</div></body></html>
