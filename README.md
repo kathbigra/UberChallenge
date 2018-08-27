@@ -11,7 +11,7 @@ Clone this repository and import into Android Studio
 git clone https://github.com/kathbigra/UberChallenge.git
 
 Prerequisites
-A working android studio setup with Java 1.8+ and android sdk installed.
+A working android studio setup with Java 1.8+ and android sdk installed. DO MAKE SURE PROPER ANDROID SDK, PLATFORM TOOLS ETC are there. 
 
 Code structure:
 The code structure follows an standard Android setup for source, test and resources. In the code part classes are divided in various packages as per their classification.
@@ -23,11 +23,11 @@ Before downloading actual image we try to look into Memory cache first and then 
 In case the service is not returning any more asset we assume that all the assets are already consumed, Also if in first attempt no image are returned we assume the query string is wrong. 
 File cache simple store all the bitmap on the local storage with file name as the hashcode of the image url. In case user goes back to the search page we clean all the cache and try to restore athe resource that is in use.
 Deployment:
-The generated apk is added in the code at ìUberChallenge\app\build\outputs\apk\debugî. It can be directly installed to any Android device or any Android emulator.
+The generated apk is added in the code at ‚ÄúUberChallenge\app\build\outputs\apk\debug‚Äù. It can be directly installed to any Android device or any Android emulator.
 One can also deploy on any device from the code setup. Create a run configuration for your app with starting point as SearchActivity(default launcher activity).
 
 Running Tests:
-One can run any Test File separately or run the Test Suite  ìUnitTestSuiteInstrumented.javaî. Currently the code coverage is at 78%. The coverage reports are also added in the code at ìUberChallenge\app\build\reports\coverage\debug\index.htmlî.
+One can run any Test File separately or run the Test Suite  ‚ÄúUnitTestSuiteInstrumented.java‚Äù. Currently the code coverage is at 78%. The coverage reports are also added in the code at ‚ÄúUberChallenge\app\build\reports\coverage\debug\index.html‚Äù.
 
 Things to be implement further:
 Unit Tests: Most of the test cases currently are only focused on positive test case and code coverage. Usually  half of my test cases focus on negative scenarios and conditions/checks. These are the area where Unit test cases are really helpful. 
