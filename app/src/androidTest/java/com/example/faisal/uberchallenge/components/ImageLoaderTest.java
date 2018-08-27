@@ -25,11 +25,6 @@ import org.junit.runner.RunWith;
 public class ImageLoaderTest {
     private Context instrumentationCtx;
 
-   /* @BeforeClass
-    public static void setupBeforeClass() {
-        Looper.prepare();
-    }*/
-
     @Before
     public void setupBeforeFunction() {
         instrumentationCtx = InstrumentationRegistry.getTargetContext();
